@@ -1,0 +1,9 @@
+{
+  "name": "Predictive Geopolitical Earth Dashboard",
+  "description": "An AI-powered dashboard for predicting geopolitical events and monitoring global stability using a 3D Earth visualization.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
