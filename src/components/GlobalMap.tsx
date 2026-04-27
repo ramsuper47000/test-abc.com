@@ -20,6 +20,7 @@ interface GlobalMapProps {
 
 export default function GlobalMap({ events = [] }: GlobalMapProps) {
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [mapMode, setMapMode] = useState<'2D' | '3D'>('3D');
 
   const riskPoints = useMemo(() => {
     if (!events.length) return [];
@@ -58,28 +59,58 @@ export default function GlobalMap({ events = [] }: GlobalMapProps) {
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3 p-6 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 overflow-hidden glow-hover" style={{ height: '500px' }}>
-          <Suspense fallback={
-            <div className="w-full h-full flex items-center justify-center text-white/20">
-              Initializing 3D Intelligence Grid...
+          {mapMode === '3D' ? (
+            <Suspense fallback={
+              <div className="w-full h-full flex items-center justify-center text-white/20">
+                Initializing 3D Intelligence Grid...
+              </div>
+            }>
+              <Canvas camera={{ position: [0, 0, 2.5], fov: 45 }}>
+                <Stars radius={100} depth={50} count={5000} factor={4} fade speed={0.5} />
+                <Globe riskPoints={riskPoints} maxNodes={50} />
+                <OrbitControls
+                  autoRotate
+                  autoRotateSpeed={0.5}
+                  enableZoom={true}
+                  enablePan={true}
+                  enableRotate={true}
+                />
+                <ambientLight intensity={0.5} />
+                <pointLight position={[10, 10, 5]} intensity={1.5} />
+              </Canvas>
+            </Suspense>
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-black/40 rounded-xl border border-white/5">
+              <MapPin className="w-12 h-12 text-blue-500/50 mb-4" />
+              <p className="text-white/60 font-medium">2D Map Projection</p>
+              <p className="text-white/40 text-sm mt-2">Displaying flattened tactical view (Mock rendering)</p>
             </div>
-          }>
-            <Canvas camera={{ position: [0, 0, 2.5], fov: 45 }}>
-              <Stars radius={100} depth={50} count={5000} factor={4} fade speed={0.5} />
-              <Globe riskPoints={riskPoints} maxNodes={50} />
-              <OrbitControls
-                autoRotate
-                autoRotateSpeed={0.5}
-                enableZoom={true}
-                enablePan={true}
-                enableRotate={true}
-              />
-              <ambientLight intensity={0.5} />
-              <pointLight position={[10, 10, 5]} intensity={1.5} />
-            </Canvas>
-          </Suspense>
+          )}
         </div>
 
-        <div className="p-6 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 space-y-4 glow-hover">
+        <div id="map-controls-panel" className="p-6 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 space-y-4 glow-hover">
+          <div className="p-4 rounded-lg bg-white/5 border border-white/10 mb-6">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3">Map Render Mode</p>
+            <div className="grid grid-cols-2 gap-2 bg-black/40 p-1 rounded-lg">
+              <button
+                onClick={() => setMapMode('2D')}
+                className={`py-2 rounded-md text-xs font-medium transition-all ${
+                  mapMode === '2D' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'text-white/50 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                2D Flat 
+              </button>
+              <button
+                onClick={() => setMapMode('3D')}
+                className={`py-2 rounded-md text-xs font-medium transition-all ${
+                  mapMode === '3D' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'text-white/50 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                3D Globe
+              </button>
+            </div>
+          </div>
+
           <div>
             <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 block mb-3">Quick Search</label>
             <div className="space-y-2">

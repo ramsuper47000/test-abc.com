@@ -44,8 +44,9 @@ const fetchNASASatelliteImagery = async (lat: number, lon: number): Promise<Sate
       source: 'NASA LANDSAT',
       coordinates: { lat, lon }
     }];
-  } catch (error: any) {
-    console.error('NASA satellite imagery error:', error.message || 'Unknown error');
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('NASA satellite imagery error:', errorMessage);
     return [];
   }
 };
@@ -74,8 +75,9 @@ const fetchWeatherData = async (lat: number, lon: number): Promise<WeatherData |
       precipitation: current.precipitation || 0,
       timestamp: current.time || new Date().toISOString()
     };
-  } catch (error: any) {
-    console.error('Weather data error:', error.message || 'Unknown error');
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Weather data error:', errorMessage);
     return null;
   }
 };

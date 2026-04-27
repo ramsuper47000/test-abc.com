@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Router, Request, Response } from 'express';
 import axios from 'axios';
 import { getFromCache, setInCache } from '../utils/cache.ts';
@@ -31,23 +32,24 @@ const fetchNASAEONET = async (): Promise<GeoEvent[]> => {
       }
     );
 
-    return (response.data.events || []).map((event: any) => {
-      const geometry = event.geometries?.[0];
+    return (response.data.events || []).map((event: unknown) => {
+      const geometry = (event as any).geometries?.[0];
       return {
-        id: event.id,
-        title: event.title,
-        description: event.description || '',
+        id: (event as any).id,
+        title: (event as any).title,
+        description: (event as any).description || '',
         coordinates: {
           lat: geometry?.coordinates?.[1] || 0,
           lon: geometry?.coordinates?.[0] || 0
         },
         date: geometry?.date || new Date().toISOString(),
         source: 'NASA',
-        eventType: event.categories?.[0]?.title || 'Unknown'
+        eventType: (event as any).categories?.[0]?.title || 'Unknown'
       };
     });
-  } catch (err: any) {
-    console.error('NASA EONET error:', err.message || 'Unknown error');
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('NASA EONET error:', errorMessage);
     return [];
   }
 };
@@ -61,11 +63,11 @@ const fetchUSGSEarthquakes = async (): Promise<GeoEvent[]> => {
       }
     );
 
-    return (response.data.features || []).map((feature: any) => {
-      const properties = feature.properties || {};
-      const geometry = feature.geometry || { coordinates: [0, 0] };
+    return (response.data.features || []).map((feature: unknown) => {
+      const properties = (feature as any).properties || {};
+      const geometry = (feature as any).geometry || { coordinates: [0, 0] };
       return {
-        id: feature.id,
+        id: (feature as any).id,
         title: `Earthquake - ${properties.title || 'Unknown'}`,
         description: properties.place || '',
         coordinates: {
@@ -78,8 +80,9 @@ const fetchUSGSEarthquakes = async (): Promise<GeoEvent[]> => {
         eventType: 'Earthquake'
       };
     });
-  } catch (err: any) {
-    console.error('USGS API error:', err.message || 'Unknown error');
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('USGS API error:', errorMessage);
     return [];
   }
 };

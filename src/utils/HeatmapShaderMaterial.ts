@@ -1,5 +1,3 @@
-import * as THREE from 'three';
-
 export const getRiskColor = (score: number) => {
   if (score > 80) return '#ef4444'; // Red
   if (score > 50) return '#f59e0b'; // Amber

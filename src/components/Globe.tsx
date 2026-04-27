@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo, memo } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { RiskScore } from '../utils/correlationEngine';
 import { getRiskColor } from '../utils/HeatmapShaderMaterial';
@@ -10,31 +10,31 @@ interface GlobeProps {
     lat: number;
     lng: number;
     risk: RiskScore;
-    data: any;
+    data: unknown;
   }>;
-  onPointClick?: (lat: number, lng: number, data: any) => void;
+  onPointClick?: (lat: number, lng: number, data: unknown) => void;
   maxNodes?: number;
 }
 
 const GlobeInner = memo(function GlobeInner({
   riskPoints = [],
-  onPointClick,
   maxNodes = 50,
 }: GlobeProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const atmosphereRef = useRef<THREE.Mesh>(null);
   const glowsRef = useRef<THREE.Group>(null);
-  const { camera } = useThree();
 
+  const atmosphereRef = useRef<THREE.Mesh>(null);
+  
   const limitedRiskPoints = useMemo(() => {
     return riskPoints.slice(0, maxNodes);
   }, [riskPoints, maxNodes]);
 
   useEffect(() => {
     if (!groupRef.current) return;
+    const currentGroup = groupRef.current;
 
     try {
-      groupRef.current.clear();
+      currentGroup.clear();
 
       const earthGeometry = new THREE.IcosahedronGeometry(1, 6);
       const earthMaterial = new THREE.MeshPhongMaterial({
@@ -45,7 +45,7 @@ const GlobeInner = memo(function GlobeInner({
       });
 
       const earth = new THREE.Mesh(earthGeometry, earthMaterial);
-      groupRef.current.add(earth);
+      currentGroup.add(earth);
 
       const wireframeGeometry = new THREE.IcosahedronGeometry(1.005, 6);
       const wireframeMaterial = new THREE.MeshPhongMaterial({
@@ -58,7 +58,7 @@ const GlobeInner = memo(function GlobeInner({
       });
 
       const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial);
-      groupRef.current.add(wireframe);
+      currentGroup.add(wireframe);
 
       const atmosphereGeometry = new THREE.IcosahedronGeometry(1.08, 6);
       const atmosphereMaterial = new THREE.MeshPhongMaterial({
@@ -71,7 +71,7 @@ const GlobeInner = memo(function GlobeInner({
 
       const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
       atmosphereRef.current = atmosphere;
-      groupRef.current.add(atmosphere);
+      currentGroup.add(atmosphere);
 
       const gaugeLinesGeometry = new THREE.BufferGeometry();
       const gaugeLinePositions: number[] = [];
@@ -101,18 +101,18 @@ const GlobeInner = memo(function GlobeInner({
       });
 
       const gaugeLines = new THREE.LineSegments(gaugeLinesGeometry, gaugeLinesMatera);
-      groupRef.current.add(gaugeLines);
+      currentGroup.add(gaugeLines);
 
       const glowsGroup = new THREE.Group();
       glowsRef.current = glowsGroup;
-      groupRef.current.add(glowsGroup);
+      currentGroup.add(glowsGroup);
     } catch (error) {
       console.error('Error creating globe geometry:', error);
     }
 
     return () => {
-      if (groupRef.current) {
-        groupRef.current.traverse((child) => {
+      if (currentGroup) {
+        currentGroup.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             child.geometry.dispose();
             if (Array.isArray(child.material)) {

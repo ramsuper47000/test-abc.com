@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Router, Request, Response } from 'express';
 import axios from 'axios';
 import { getFromCache, setInCache } from '../utils/cache.ts';
@@ -35,18 +36,19 @@ const fetchGDELTNews = async (): Promise<GDELTArticle[]> => {
       }
     );
 
-    const articles: GDELTArticle[] = (response.data.articles || []).map((article: any) => ({
-      url: article.url || '#',
-      title: article.title || 'Untitled Report',
-      pubDate: article.se_date || article.date || new Date().toISOString(),
-      sourceName: article.sourcecountry || 'Global Source',
-      topics: article.themes?.split(',').slice(0, 3) || []
+    const articles: GDELTArticle[] = (response.data.articles || []).map((article: unknown) => ({
+      url: (article as any).url || '#',
+      title: (article as any).title || 'Untitled Report',
+      pubDate: (article as any).se_date || (article as any).date || new Date().toISOString(),
+      sourceName: (article as any).sourcecountry || 'Global Source',
+      topics: (article as any).themes?.split(',').slice(0, 3) || []
     }));
 
     setInCache(cacheKey, articles);
     return articles;
-  } catch (err: any) {
-    console.error('GDELT API error:', err.message || 'Unknown error');
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('GDELT API error:', errorMessage);
     if (axios.isAxiosError(err)) {
       console.error('Status:', err.response?.status);
       console.error('Timeout:', err.code === 'ECONNABORTED');
@@ -123,11 +125,11 @@ router.get('/search', async (req: Request, res: Response) => {
       }
     );
 
-    const articles = (response.data.articles || []).map((article: any) => ({
-      url: article.url || '#',
-      title: article.title || 'Untitled Report',
-      pubDate: article.se_date || article.date || new Date().toISOString(),
-      sourceName: article.sourcecountry || 'Global Source'
+    const articles = (response.data.articles || []).map((article: unknown) => ({
+      url: (article as any).url || '#',
+      title: (article as any).title || 'Untitled Report',
+      pubDate: (article as any).se_date || (article as any).date || new Date().toISOString(),
+      sourceName: (article as any).sourcecountry || 'Global Source'
     }));
 
     setInCache(cacheKey, articles);

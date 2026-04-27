@@ -21,7 +21,7 @@ export async function fetchFromAPI(endpoint: string, options: RequestInit = {}) 
   }
 }
 
-export async function postToAPI(endpoint: string, data: any, options: RequestInit = {}) {
+export async function postToAPI(endpoint: string, data: unknown, options: RequestInit = {}) {
   return fetchFromAPI(endpoint, {
     method: 'POST',
     body: JSON.stringify(data),

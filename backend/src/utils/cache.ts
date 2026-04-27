@@ -6,7 +6,7 @@ export const getFromCache = (key: string) => {
   return cache.get(key);
 };
 
-export const setInCache = (key: string, value: any, ttl?: number) => {
+export const setInCache = (key: string, value: unknown, ttl?: number) => {
   if (ttl) {
     cache.set(key, value, ttl);
   } else {

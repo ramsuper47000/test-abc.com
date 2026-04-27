@@ -45,8 +45,9 @@ router.post('/analyze', async (req: Request, res: Response) => {
       cached: false,
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
-    console.error('AI analysis error:', error.message || 'Unknown error');
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('AI analysis error:', errorMessage);
     res.status(500).json({
       success: false,
       error: 'Failed to analyze request'
@@ -94,8 +95,9 @@ Analyze potential outcomes and confidence levels. Structure response as JSON wit
       data: prediction,
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
-    console.error('AI prediction error:', error.message || 'Unknown error');
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('AI prediction error:', errorMessage);
     res.status(500).json({
       success: false,
       error: 'Failed to generate prediction'
